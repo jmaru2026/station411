@@ -194,7 +194,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
       <div className={styles.leftPanel}>
 
         <div className={styles.leftHeader}>
-          <h3>All Locations</h3>
+          <span className={styles.AllLocationsText}>All Locations</span>&ensp;
           <span>{filteredStations.length} stores available</span>
         </div>
 
@@ -243,7 +243,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
 
           {/* Address */}
           <div className={styles.infoRow}>
-            <Icon iconName="POI" style={{color:'#d30000'}}/>
+            <Icon iconName="POI" style={{backgroundColor:'#d30000',color:'white', borderRadius:'2px',padding:'10px'}}/>
             <div className={styles.divwraping}>
               <b>{selected.address}</b>
               <b>{selected.address2}</b>
@@ -252,7 +252,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
 
           {/* Toll Free */}
           <div className={styles.infoRow}>
-            <Icon iconName="Phone" style={{color:'#d30000'}}/>
+            <Icon iconName="Phone" style={{backgroundColor:'#d30000',color:'white', borderRadius:'2px',padding:'10px'}}/>
             <div className={styles.divwraping}>
               <b>{selected.tollFree}</b>
               <span>Toll Free</span>
@@ -261,7 +261,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
 
           {/* Phone */}
           <div className={styles.infoRow}>
-            <Icon iconName="Phone" style={{color:'#d30000'}}/>
+            <Icon iconName="Phone" style={{backgroundColor:'#d30000',color:'white', borderRadius:'2px',padding:'10px'}}/>
             <div className={styles.divwraping}>
               <b>{selected.phone}</b>
               <span>Main Line</span>
@@ -270,7 +270,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
 
           {/* Fax */}
           <div className={styles.infoRow}>
-            <Icon iconName="Print" style={{color:'#d30000'}}/>
+            <Icon iconName="Print" style={{backgroundColor:'#d30000',color:'white', borderRadius:'2px',padding:'10px'}}/>
             <div className={styles.divwraping}>
               <b>{selected.fax}</b>
               <span>Fax</span>
@@ -279,7 +279,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
 
           {/* Email */}
           <div className={styles.infoRow}>
-            <Icon iconName="Mail" style={{color:'#d30000'}}/>
+            <Icon iconName="Mail" style={{backgroundColor:'#d30000',color:'white', borderRadius:'2px',padding:'10px'}}/>
             <div className={styles.divwraping}>
               <b>{selected.email}</b>
               <span>Email</span>
@@ -288,7 +288,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
 
           {/* Manager */}
           <div className={styles.infoRow}>
-            <Icon iconName="Contact" style={{color:'#d30000'}}/>
+            <Icon iconName="Contact" style={{backgroundColor:'#d30000',color:'white', borderRadius:'2px',padding:'10px'}}/>
             <div className={styles.divwraping}>
               <b>{selected.manager}</b>
               <span>Store Manager</span>
