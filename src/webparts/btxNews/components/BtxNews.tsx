@@ -1,0 +1,286 @@
+import * as React from 'react';
+import styles from './BtxNews.module.scss';
+import { IBtxNewsProps } from './IBtxNewsProps';
+import { Icon } from '@fluentui/react';
+
+declare const google: any;
+
+/* =====================================================
+   TYPES
+===================================================== */
+
+interface IStation {
+  id: number;
+  title: string;
+
+  address: string;
+  address2: string;
+
+  tollFree: string;
+  phone: string;
+  fax: string;
+
+  email: string;
+  manager: string;
+
+  lat: number;
+  lng: number;
+
+  image: string;
+}
+
+
+const GOOGLE_KEY = "AIzaSyAKEce6-O8Jh7zoS2a-o0AO5K8MJAt_zwE";
+
+/* ===================================================== */
+
+const BtxNews: React.FC<IBtxNewsProps> = () => {
+
+  const mapRef = React.useRef<HTMLDivElement>(null);
+  const mapInstance = React.useRef<any>(null);
+  const markersRef = React.useRef<any[]>([]);
+
+  const [selected, setSelected] = React.useState<IStation | null>(null);
+  const [search, setSearch] = React.useState('');
+
+  /* =====================================================
+     DATA
+  ===================================================== */
+
+  const stations: IStation[] = [
+    {
+      id: 1,
+      title: '(ATL) Atlanta, GA - 24',
+
+      address: '4694 Aviation Parkway, Suite K',
+      address2: 'Atlanta, GA 30349',
+
+      tollFree: '(800) 329-6362',
+      phone: '(404) 767-3210',
+      fax: '(404) 767-5789',
+
+      email: 'ATL@btxglobal.com',
+      manager: 'Blane Kirby / Anne Pope',
+
+      lat: 33.6407,
+      lng: -84.4277,
+
+      image: '/sites/BTXHub/SiteAssets/Our-Company-Featured.webp'
+    }
+  ];
+
+
+  /* =====================================================
+     FILTERED LIST
+  ===================================================== */
+
+  const filteredStations = React.useMemo(() => {
+    return stations.filter(s =>
+      s.title.toLowerCase().indexOf(search.toLowerCase()) > -1
+    );
+  }, [search]);
+
+  /* =====================================================
+     LOAD MAP
+  ===================================================== */
+
+  React.useEffect(() => {
+
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_KEY}`;
+    script.async = true;
+
+    script.onload = () => initMap();
+
+    document.body.appendChild(script);
+
+  }, []);
+
+  const initMap = () => {
+
+    if (!mapRef.current) return;
+
+    mapInstance.current = new google.maps.Map(mapRef.current, {
+      center: { lat: 39.5, lng: -98.35 },
+      zoom: 4
+    });
+
+    renderMarkers(filteredStations);
+
+    if (filteredStations.length > 0) {
+      setSelected(filteredStations[0]);
+    }
+  };
+
+  /* =====================================================
+     MARKERS (refresh on search)
+  ===================================================== */
+
+  React.useEffect(() => {
+    renderMarkers(filteredStations);
+
+    if (selected && !filteredStations.some(x => x.id === selected.id)) {
+      setSelected(filteredStations[0] || null);
+    }
+  }, [filteredStations]);
+
+  const renderMarkers = (list: IStation[]) => {
+
+    if (!mapInstance.current) return;
+
+    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current = [];
+
+    list.forEach(s => {
+
+      const marker = new google.maps.Marker({
+        position: { lat: s.lat, lng: s.lng },
+        map: mapInstance.current,
+        title: s.title
+      });
+
+      marker.addListener("click", () => selectStation(s));
+
+      markersRef.current.push(marker);
+    });
+  };
+
+  /* =====================================================
+     SELECT
+  ===================================================== */
+
+  const selectStation = (station: IStation) => {
+
+    setSelected(station);
+
+    mapInstance.current.panTo({
+      lat: station.lat,
+      lng: station.lng
+    });
+
+    mapInstance.current.setZoom(10);
+  };
+
+  /* =====================================================
+     UI
+  ===================================================== */
+
+  return (
+    <div className={styles.wrapper}>
+
+      {/* LEFT PANEL */}
+      <div className={styles.leftPanel}>
+
+        <div className={styles.leftHeader}>
+          <h3>All Locations</h3>
+          <span>{filteredStations.length} stores available</span>
+        </div>
+
+        {/* SEARCH */}
+        <div className={styles.searchWrap}>
+          <Icon iconName="Search" style={{color:'#d30000'}}/>
+          <input
+            placeholder="Search location..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            type='Search'
+          />
+        </div>
+
+        {filteredStations.map(s => (
+          <div
+            key={s.id}
+            className={`${styles.locationRow} ${selected?.id === s.id ? styles.active : ''}`}
+            onClick={() => selectStation(s)}
+          >
+            <Icon iconName="POI" style={{color:'#d30000'}}/>
+            <span>{s.title}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* MAP */}
+      <div ref={mapRef} className={styles.map} />
+
+      {/* DETAILS CARD */}
+      {selected && (
+        <div className={styles.detailsCard}>
+
+          <button
+            className={styles.close}
+            onClick={() => setSelected(null)}
+          >
+            ✕
+          </button>
+
+          <img src={selected.image} className={styles.storeImage} />
+
+          <h2 className={styles.title}>{selected.title}</h2>
+
+          <hr className={styles.divider} />
+
+          {/* Address */}
+          <div className={styles.infoRow}>
+            <Icon iconName="POI" style={{color:'#d30000'}}/>
+            <div className={styles.divwraping}>
+              <b>{selected.address}</b>
+              <b>{selected.address2}</b>
+            </div>
+          </div>
+
+          {/* Toll Free */}
+          <div className={styles.infoRow}>
+            <Icon iconName="Phone" style={{color:'#d30000'}}/>
+            <div className={styles.divwraping}>
+              <b>{selected.tollFree}</b>
+              <span>Toll Free</span>
+            </div>
+          </div>
+
+          {/* Phone */}
+          <div className={styles.infoRow}>
+            <Icon iconName="Phone" style={{color:'#d30000'}}/>
+            <div className={styles.divwraping}>
+              <b>{selected.phone}</b>
+              <span>Main Line</span>
+            </div>
+          </div>
+
+          {/* Fax */}
+          <div className={styles.infoRow}>
+            <Icon iconName="Print" style={{color:'#d30000'}}/>
+            <div className={styles.divwraping}>
+              <b>{selected.fax}</b>
+              <span>Fax</span>
+            </div>
+          </div>
+
+          {/* Email */}
+          <div className={styles.infoRow}>
+            <Icon iconName="Mail" style={{color:'#d30000'}}/>
+            <div className={styles.divwraping}>
+              <b>{selected.email}</b>
+              <span>Email</span>
+            </div>
+          </div>
+
+          {/* Manager */}
+          <div className={styles.infoRow}>
+            <Icon iconName="Contact" style={{color:'#d30000'}}/>
+            <div className={styles.divwraping}>
+              <b>{selected.manager}</b>
+              <span>Store Manager</span>
+            </div>
+          </div>
+
+          <button className={styles.primaryBtn}>Open Store</button>
+
+        </div>
+      )}
+
+
+    </div>
+  );
+};
+
+export default BtxNews;
