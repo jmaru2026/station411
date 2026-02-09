@@ -15,9 +15,8 @@ import { IBtxNewsProps } from './components/IBtxNewsProps';
 export interface IBtxNewsWebPartProps {
   description: string;
   context:any;
-  NewsTitle:string;
-  YearsTitle:string;
-  CurrentYear:string;
+  List:string;
+  gmapToken:string;
 }
 
 export default class BtxNewsWebPart extends BaseClientSideWebPart<IBtxNewsWebPartProps> {
@@ -35,9 +34,8 @@ export default class BtxNewsWebPart extends BaseClientSideWebPart<IBtxNewsWebPar
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
         userDisplayName: this.context.pageContext.user.displayName,
         context:this.context,
-        NewsTitle:this.properties.NewsTitle,
-        YearsTitle:this.properties.YearsTitle,
-        CurrentYear:this.properties.CurrentYear
+        List:this.properties.List,
+        gmapToken:this.properties.gmapToken
       }
     );
 
@@ -116,17 +114,13 @@ export default class BtxNewsWebPart extends BaseClientSideWebPart<IBtxNewsWebPar
             {
               groupName: strings.BasicGroupName,
               groupFields: [
-                PropertyPaneTextField('NewsTitle', {
-                  label: "News Title",
-                  value:"Operational Bulletins "
+                PropertyPaneTextField('List', {
+                  label: "List Title",
+                  value:"Station 411"
                 }),
-                PropertyPaneTextField('YearsTitle', {
-                  label: "Years Title",
-                  value:"Archive Years"
-                }),
-                PropertyPaneTextField('CurrentYear', {
-                  label: "Current Year",
-                  value:"2026"
+                PropertyPaneTextField('gmapToken', {
+                  label: "Google Map Token",
+                  value:"AIzaSyAKEce6-O8Jh7zoS2a-o0AO5K8MJAt_zwE"
                 })
               ]
             }

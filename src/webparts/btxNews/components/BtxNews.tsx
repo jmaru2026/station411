@@ -2,6 +2,7 @@ import * as React from 'react';
 import styles from './BtxNews.module.scss';
 import { IBtxNewsProps } from './IBtxNewsProps';
 import { Icon } from '@fluentui/react';
+import { getAllData } from '../services/SpService';
 
 declare const google: any;
 
@@ -27,58 +28,79 @@ interface IStation {
   lng: number;
 
   image: string;
+  link:string;
 }
 
 
-const GOOGLE_KEY = "AIzaSyAKEce6-O8Jh7zoS2a-o0AO5K8MJAt_zwE";
-
 /* ===================================================== */
 
-const BtxNews: React.FC<IBtxNewsProps> = () => {
+const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
 
   const mapRef = React.useRef<HTMLDivElement>(null);
   const mapInstance = React.useRef<any>(null);
   const markersRef = React.useRef<any[]>([]);
-
+  const [stations, setStations] = React.useState<IStation[]>([]);
+  const [filteredStations, setFilteredStations] = React.useState<IStation[]>([]);
   const [selected, setSelected] = React.useState<IStation | null>(null);
   const [search, setSearch] = React.useState('');
 
   /* =====================================================
      DATA
   ===================================================== */
+  React.useEffect(() => {
 
-  const stations: IStation[] = [
-    {
-      id: 1,
-      title: '(ATL) Atlanta, GA - 24',
+    const loadData = async () => {
 
-      address: '4694 Aviation Parkway, Suite K',
-      address2: 'Atlanta, GA 30349',
+      const data = await getAllData(List,context);
 
-      tollFree: '(800) 329-6362',
-      phone: '(404) 767-3210',
-      fax: '(404) 767-5789',
+      setStations(data);
+      setFilteredStations(data);
 
-      email: 'ATL@btxglobal.com',
-      manager: 'Blane Kirby / Anne Pope',
+      if (data.length > 0) {
+        setSelected(data[0]);
+      }
+    };
 
-      lat: 33.6407,
-      lng: -84.4277,
+    loadData();
 
-      image: '/sites/BTXHub/SiteAssets/Our-Company-Featured.webp'
-    }
-  ];
+  }, [List]);
+
+  // const stations: IStation[] = [
+  //   {
+  //     id: 1,
+  //     title: '(ATL) Atlanta, GA - 24',
+
+  //     address: '4694 Aviation Parkway, Suite K',
+  //     address2: 'Atlanta, GA 30349',
+
+  //     tollFree: '(800) 329-6362',
+  //     phone: '(404) 767-3210',
+  //     fax: '(404) 767-5789',
+
+  //     email: 'ATL@btxglobal.com',
+  //     manager: 'Blane Kirby / Anne Pope',
+
+  //     lat: 33.6407,
+  //     lng: -84.4277,
+
+  //     image: '/sites/BTXHub/SiteAssets/Our-Company-Featured.webp',
+  //     link:''
+  //   }
+  // ];
 
 
   /* =====================================================
      FILTERED LIST
   ===================================================== */
+  React.useEffect(() => {
 
-  const filteredStations = React.useMemo(() => {
-    return stations.filter(s =>
+    const result = stations.filter(s =>
       s.title.toLowerCase().indexOf(search.toLowerCase()) > -1
     );
-  }, [search]);
+
+    setFilteredStations(result);
+
+  }, [search, stations]);
 
   /* =====================================================
      LOAD MAP
@@ -87,7 +109,7 @@ const BtxNews: React.FC<IBtxNewsProps> = () => {
   React.useEffect(() => {
 
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_KEY}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${"AIzaSyAKEce6-O8Jh7zoS2a-o0AO5K8MJAt_zwE"}`;
     script.async = true;
 
     script.onload = () => initMap();

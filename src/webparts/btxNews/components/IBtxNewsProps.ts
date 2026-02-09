@@ -5,7 +5,6 @@ export interface IBtxNewsProps {
   hasTeamsContext: boolean;
   userDisplayName: string;
   context:any;
-  NewsTitle:string;
-  YearsTitle:string;
-  CurrentYear:string;
+  List:string;
+  gmapToken:string;
 }
