@@ -180,7 +180,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
       lng: station.lng
     });
 
-    mapInstance.current.setZoom(10);
+    mapInstance.current.setZoom(20);
   };
 
   /* =====================================================
@@ -295,7 +295,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
             </div>
           </div>
 
-          <button className={styles.primaryBtn}><Icon iconName="Warehouse" />Visit Store</button>
+          <button className={styles.primaryBtn} onClick={() => {window.open(selected?.link,"_blank","")}}><Icon iconName="Warehouse" />Visit Store</button>
 
         </div>
       )}
