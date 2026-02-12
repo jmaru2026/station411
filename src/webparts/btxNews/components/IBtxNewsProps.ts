@@ -7,4 +7,10 @@ export interface IBtxNewsProps {
   context:any;
   List:string;
   gmapToken:string;
+  dynamicZoom:string;
+  TollFree:string;
+  MainLine:string;
+  Fax:string;
+  Email:string;
+  StoreManager:string;
 }

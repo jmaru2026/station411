@@ -17,6 +17,12 @@ export interface IBtxNewsWebPartProps {
   context:any;
   List:string;
   gmapToken:string;
+  dynamicZoom:string;
+  TollFree:string;
+  MainLine:string;
+  Fax:string;
+  Email:string;
+  StoreManager:string;
 }
 
 export default class BtxNewsWebPart extends BaseClientSideWebPart<IBtxNewsWebPartProps> {
@@ -35,7 +41,13 @@ export default class BtxNewsWebPart extends BaseClientSideWebPart<IBtxNewsWebPar
         userDisplayName: this.context.pageContext.user.displayName,
         context:this.context,
         List:this.properties.List,
-        gmapToken:this.properties.gmapToken
+        gmapToken:this.properties.gmapToken,
+        dynamicZoom:this.properties.dynamicZoom,
+        TollFree:this.properties.TollFree,
+        MainLine:this.properties.MainLine,
+        Fax:this.properties.Fax,
+        Email:this.properties.Email,
+        StoreManager:this.properties.StoreManager
       }
     );
 
@@ -118,10 +130,34 @@ export default class BtxNewsWebPart extends BaseClientSideWebPart<IBtxNewsWebPar
                   label: "List Title",
                   value:"Station 411"
                 }),
+                PropertyPaneTextField('dynamicZoom', {
+                  label: "Dynamic Zoom Value",
+                  value:"20"
+                }),
                 PropertyPaneTextField('gmapToken', {
                   label: "Google Map Token",
                   value:"AIzaSyAKEce6-O8Jh7zoS2a-o0AO5K8MJAt_zwE"
-                })
+                }),
+                PropertyPaneTextField('TollFree', {
+                  label: "TollFree Title",
+                  value:"Toll Free"
+                }),
+                PropertyPaneTextField('MainLine', {
+                  label: "MainLine Title",
+                  value:"Main Line"
+                }),
+                PropertyPaneTextField('Fax', {
+                  label: "Fax Title",
+                  value:"Fax"
+                }),
+                PropertyPaneTextField('Email', {
+                  label: "Email Title",
+                  value:"Email"
+                }),
+                PropertyPaneTextField('StoreManager', {
+                  label: "Store Manager Title",
+                  value:"Store Manager"
+                }),
               ]
             }
           ]

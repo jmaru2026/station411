@@ -34,7 +34,7 @@ interface IStation {
 
 /* ===================================================== */
 
-const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
+const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,TollFree,MainLine,Fax,Email,StoreManager}) => {
 
   const mapRef = React.useRef<HTMLDivElement>(null);
   const mapInstance = React.useRef<any>(null);
@@ -180,7 +180,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
       lng: station.lng
     });
 
-    mapInstance.current.setZoom(20);
+    mapInstance.current.setZoom(dynamicZoom);
   };
 
   /* =====================================================
@@ -194,8 +194,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
       <div className={styles.leftPanel}>
 
         <div className={styles.leftHeader}>
-          <span className={styles.AllLocationsText}>All Locations</span>&ensp;
-          <span>{filteredStations.length} stores available</span>
+          <span className={styles.AllLocationsText}>All Locations</span>&ensp;<span>{filteredStations.length} stores available</span>
         </div>
 
         {/* SEARCH */}
@@ -255,7 +254,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
             <Icon iconName="Phone" style={{backgroundColor:'rgb(242 234 234)',color:'#D30000', borderRadius:'2px',padding:'10px'}}/>
             <div className={styles.divwraping}>
               <b>{selected.tollFree}</b>
-              <span>Toll Free</span>
+              <span>{TollFree}</span>
             </div>
           </div>
 
@@ -264,7 +263,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
             <Icon iconName="Phone" style={{backgroundColor:'rgb(242 234 234)',color:'#D30000', borderRadius:'2px',padding:'10px'}}/>
             <div className={styles.divwraping}>
               <b>{selected.phone}</b>
-              <span>Main Line</span>
+              <span>{MainLine}</span>
             </div>
           </div>
 
@@ -273,7 +272,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
             <Icon iconName="Print" style={{backgroundColor:'rgb(242 234 234)',color:'#D30000', borderRadius:'2px',padding:'10px'}}/>
             <div className={styles.divwraping}>
               <b>{selected.fax}</b>
-              <span>Fax</span>
+              <span>{Fax}</span>
             </div>
           </div>
 
@@ -282,7 +281,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
             <Icon iconName="Mail" style={{backgroundColor:'rgb(242 234 234)',color:'#D30000', borderRadius:'2px',padding:'10px'}}/>
             <div className={styles.divwraping}>
               <b>{selected.email}</b>
-              <span>Email</span>
+              <span>{Email}</span>
             </div>
           </div>
 
@@ -291,7 +290,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context}) => {
             <Icon iconName="Contact" style={{backgroundColor:'rgb(242 234 234)',color:'#D30000', borderRadius:'2px',padding:'10px'}}/>
             <div className={styles.divwraping}>
               <b>{selected.manager}</b>
-              <span>Store Manager</span>
+              <span>{StoreManager}</span>
             </div>
           </div>
 
