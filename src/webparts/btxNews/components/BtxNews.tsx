@@ -44,6 +44,8 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
   const [selected, setSelected] = React.useState<IStation | null>(null);
   const [search, setSearch] = React.useState('');
 
+  const defaultZoom = parseInt(dynamicZoom?.valueOf(), 10)
+
   /* =====================================================
      DATA
   ===================================================== */
@@ -180,7 +182,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
       lng: station.lng
     });
 
-    mapInstance.current.setZoom(dynamicZoom);
+    mapInstance.current.setZoom(defaultZoom);
   };
 
   /* =====================================================
