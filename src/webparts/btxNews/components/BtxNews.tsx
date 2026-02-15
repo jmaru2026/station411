@@ -58,9 +58,9 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
       setStations(data);
       setFilteredStations(data);
 
-      if (data.length > 0) {
-        setSelected(data[0]);
-      }
+      // if (data.length > 0) {
+      //   setSelected();
+      // }
     };
 
     loadData();
@@ -296,7 +296,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
             </div>
           </div>
 
-          <button className={styles.primaryBtn} onClick={() => {window.open(selected?.link,"_blank","")}}><Icon iconName="Warehouse" />Visit Store</button>
+          <button className={styles.primaryBtn} onClick={() => {window.open(selected?.link,"_blank","")}}><Icon iconName="Warehouse" />View Station Profile</button>
 
         </div>
       )}
