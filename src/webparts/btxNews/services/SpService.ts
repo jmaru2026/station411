@@ -100,7 +100,7 @@ export const getAllData = async (
       lng: Number(i.lng) || 0,
 
       image: i.Image?.Url || i.Image || "",
-      link: i.StoreLink?.Url || i.Link || ""
+      link: i?.StoreLink || ""
     }));
 
     return stations;
