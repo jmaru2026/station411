@@ -127,7 +127,7 @@ export default class BtxNewsWebPart extends BaseClientSideWebPart<IBtxNewsWebPar
               groupName: strings.BasicGroupName,
               groupFields: [
                 PropertyPaneTextField('List', {
-                  label: "List Title",
+                  label: "SharePoint List Title",
                   value:"Station 411"
                 }),
                 PropertyPaneTextField('dynamicZoom', {
