@@ -28,13 +28,13 @@ interface IStation {
   lng: number;
 
   image: string;
-  link:string;
+  link: string;
 }
 
 
 /* ===================================================== */
 
-const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,TollFree,MainLine,Fax,Email,StoreManager}) => {
+const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoom, TollFree, MainLine, Fax, Email, StoreManager }) => {
 
   const mapRef = React.useRef<HTMLDivElement>(null);
   const mapInstance = React.useRef<any>(null);
@@ -43,6 +43,8 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
   const [filteredStations, setFilteredStations] = React.useState<IStation[]>([]);
   const [selected, setSelected] = React.useState<IStation | null>(null);
   const [search, setSearch] = React.useState('');
+  const [mapLoaded, setMapLoaded] = React.useState(false);
+
 
   const defaultZoom = parseInt(dynamicZoom?.valueOf(), 10)
 
@@ -53,7 +55,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
 
     const loadData = async () => {
 
-      const data = await getAllData(List,context);
+      const data = await getAllData(List, context);
 
       setStations(data);
       setFilteredStations(data);
@@ -66,29 +68,6 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
     loadData();
 
   }, [List]);
-
-  // const stations: IStation[] = [
-  //   {
-  //     id: 1,
-  //     title: '(ATL) Atlanta, GA - 24',
-
-  //     address: '4694 Aviation Parkway, Suite K',
-  //     address2: 'Atlanta, GA 30349',
-
-  //     tollFree: '(800) 329-6362',
-  //     phone: '(404) 767-3210',
-  //     fax: '(404) 767-5789',
-
-  //     email: 'ATL@btxglobal.com',
-  //     manager: 'Blane Kirby / Anne Pope',
-
-  //     lat: 33.6407,
-  //     lng: -84.4277,
-
-  //     image: '/sites/BTXHub/SiteAssets/Our-Company-Featured.webp',
-  //     link:''
-  //   }
-  // ];
 
 
   /* =====================================================
@@ -108,33 +87,68 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
      LOAD MAP
   ===================================================== */
 
+  // React.useEffect(() => {
+
+  //   const script = document.createElement("script");
+  //   script.src = `https://maps.googleapis.com/maps/api/js?key=${"AIzaSyAKEce6-O8Jh7zoS2a-o0AO5K8MJAt_zwE"}`;
+  //   script.async = true;
+
+  //   script.onload = () => initMap();
+
+  //   document.body.appendChild(script);
+
+  // }, []);
   React.useEffect(() => {
 
+    if ((window as any).google) {
+      setMapLoaded(true);
+      return;
+    }
+
     const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${"AIzaSyAKEce6-O8Jh7zoS2a-o0AO5K8MJAt_zwE"}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${gmapToken}`;
     script.async = true;
 
-    script.onload = () => initMap();
+    script.onload = () => {
+      setMapLoaded(true);
+    };
 
     document.body.appendChild(script);
 
   }, []);
 
-  const initMap = () => {
+  React.useEffect(() => {
 
-    if (!mapRef.current) return;
+  if (!mapLoaded || stations.length === 0 || !mapRef.current) return;
 
-    mapInstance.current = new google.maps.Map(mapRef.current, {
-      center: { lat: 39.5, lng: -98.35 },
-      zoom: 4
-    });
+  mapInstance.current = new google.maps.Map(mapRef.current, {
+    center: { lat: stations[0].lat, lng: stations[0].lng },
+    zoom: 4
+  });
 
-    renderMarkers(filteredStations);
+  renderMarkers(stations);
 
-    if (filteredStations.length > 0) {
-      setSelected(filteredStations[0]);
-    }
-  };
+  //setSelected(stations[0]);
+
+}, [mapLoaded, stations]);
+
+
+
+  // const initMap = () => {
+
+  //   if (!mapRef.current) return;
+
+  //   mapInstance.current = new google.maps.Map(mapRef.current, {
+  //     center: { lat: 39.5, lng: -98.35 },
+  //     zoom: 4
+  //   });
+
+  //   renderMarkers(filteredStations);
+
+  //   if (filteredStations.length > 0) {
+  //     setSelected(filteredStations[0]);
+  //   }
+  // };
 
   /* =====================================================
      MARKERS (refresh on search)
@@ -201,7 +215,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
 
         {/* SEARCH */}
         <div className={styles.searchWrap}>
-          <Icon iconName="Search" style={{color:'#d30000'}}/>
+          <Icon iconName="Search" style={{ color: '#d30000' }} />
           <input
             placeholder="Search location..."
             value={search}
@@ -216,8 +230,8 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
             className={`${styles.locationRow} ${selected?.id === s.id ? styles.active : ''}`}
             onClick={() => selectStation(s)}
           >
-            <Icon iconName="POI" style={{color:'#d30000'}}/>
-            <span style={{fontWeight:600}}>{s.title}</span>
+            <Icon iconName="POI" style={{ color: '#d30000' }} />
+            <span style={{ fontWeight: 600 }}>{s.title}</span>
           </div>
         ))}
       </div>
@@ -244,7 +258,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
 
           {/* Address */}
           <div className={styles.infoRow}>
-            <Icon iconName="POI" style={{backgroundColor:'rgb(242 234 234)',color:'#D30000', borderRadius:'2px',padding:'10px'}}/>
+            <Icon iconName="POI" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.address}</b>
               <b>{selected.address2}</b>
@@ -253,7 +267,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
 
           {/* Toll Free */}
           <div className={styles.infoRow}>
-            <Icon iconName="Phone" style={{backgroundColor:'rgb(242 234 234)',color:'#D30000', borderRadius:'2px',padding:'10px'}}/>
+            <Icon iconName="Phone" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.tollFree}</b>
               <span>{TollFree}</span>
@@ -262,7 +276,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
 
           {/* Phone */}
           <div className={styles.infoRow}>
-            <Icon iconName="Phone" style={{backgroundColor:'rgb(242 234 234)',color:'#D30000', borderRadius:'2px',padding:'10px'}}/>
+            <Icon iconName="Phone" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.phone}</b>
               <span>{MainLine}</span>
@@ -271,7 +285,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
 
           {/* Fax */}
           <div className={styles.infoRow}>
-            <Icon iconName="Print" style={{backgroundColor:'rgb(242 234 234)',color:'#D30000', borderRadius:'2px',padding:'10px'}}/>
+            <Icon iconName="Print" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.fax}</b>
               <span>{Fax}</span>
@@ -280,7 +294,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
 
           {/* Email */}
           <div className={styles.infoRow}>
-            <Icon iconName="Mail" style={{backgroundColor:'rgb(242 234 234)',color:'#D30000', borderRadius:'2px',padding:'10px'}}/>
+            <Icon iconName="Mail" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.email}</b>
               <span>{Email}</span>
@@ -289,14 +303,14 @@ const BtxNews: React.FC<IBtxNewsProps> = ({List,gmapToken,context,dynamicZoom,To
 
           {/* Manager */}
           <div className={styles.infoRow}>
-            <Icon iconName="Contact" style={{backgroundColor:'rgb(242 234 234)',color:'#D30000', borderRadius:'2px',padding:'10px'}}/>
+            <Icon iconName="Contact" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.manager}</b>
               <span>{StoreManager}</span>
             </div>
           </div>
 
-          <button className={styles.primaryBtn} onClick={() => {window.open(selected?.link,"_blank","")}}><Icon iconName="Warehouse" />View Station Profile</button>
+          <button className={styles.primaryBtn} onClick={() => { window.open(selected?.link, "_blank", "") }}><Icon iconName="Warehouse" />View Station Profile</button>
 
         </div>
       )}

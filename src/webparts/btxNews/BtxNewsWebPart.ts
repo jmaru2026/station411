@@ -119,9 +119,6 @@ export default class BtxNewsWebPart extends BaseClientSideWebPart<IBtxNewsWebPar
     return {
       pages: [
         {
-          header: {
-            description: strings.PropertyPaneDescription
-          },
           groups: [
             {
               groupName: strings.BasicGroupName,
