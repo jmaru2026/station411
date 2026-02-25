@@ -119,18 +119,18 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
 
   React.useEffect(() => {
 
-  if (!mapLoaded || stations.length === 0 || !mapRef.current) return;
+    if (!mapLoaded || stations.length === 0 || !mapRef.current) return;
 
-  mapInstance.current = new google.maps.Map(mapRef.current, {
-    center: { lat: stations[0].lat, lng: stations[0].lng },
-    zoom: 4
-  });
+    mapInstance.current = new google.maps.Map(mapRef.current, {
+      center: { lat: stations[0].lat, lng: stations[0].lng },
+      zoom: 4
+    });
 
-  renderMarkers(stations);
+    renderMarkers(stations);
 
-  //setSelected(stations[0]);
+    //setSelected(stations[0]);
 
-}, [mapLoaded, stations]);
+  }, [mapLoaded, stations]);
 
 
 
@@ -245,7 +245,17 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
 
           <button
             className={styles.close}
-            onClick={() => setSelected(null)}
+            onClick={() => {
+              setSelected(null);
+
+              if (mapInstance.current && stations.length > 0) {
+                mapInstance.current.setZoom(4); // your initial/default zoom
+                mapInstance.current.panTo({
+                  lat: stations[0].lat,
+                  lng: stations[0].lng
+                });
+              }
+            }}
           >
             ✕
           </button>
