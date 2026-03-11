@@ -57,8 +57,12 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
 
       const data = await getAllData(List, context);
 
-      setStations(data);
-      setFilteredStations(data);
+      const sortedData = data.sort((a, b) =>
+        a.title.toLowerCase().localeCompare(b.title.toLowerCase())
+      );
+
+      setStations(sortedData);
+      setFilteredStations(sortedData);
 
       // if (data.length > 0) {
       //   setSelected();
@@ -75,9 +79,13 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
   ===================================================== */
   React.useEffect(() => {
 
-    const result = stations.filter(s =>
-      s.title.toLowerCase().indexOf(search.toLowerCase()) > -1
-    );
+    const result = stations
+      .filter(s =>
+        s.title.toLowerCase().indexOf(search.toLowerCase()) > -1
+      )
+      .sort((a, b) =>
+        a.title.toLowerCase().localeCompare(b.title.toLowerCase())
+      );
 
     setFilteredStations(result);
 
