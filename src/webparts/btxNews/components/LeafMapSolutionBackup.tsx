@@ -3,58 +3,68 @@ import styles from './BtxNews.module.scss';
 import { IBtxNewsProps } from './IBtxNewsProps';
 import { Icon } from '@fluentui/react';
 import { getAllData } from '../services/SpService';
+import * as L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
-declare const google: any;
+/* =====================================================
+   FIX LEAFLET ICON ISSUE
+===================================================== */
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
+  iconUrl: require('leaflet/dist/images/marker-icon.png'),
+  shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+});
 
 /* =====================================================
    TYPES
 ===================================================== */
-
 interface IStation {
   id: number;
   title: string;
-
   address: string;
   address2: string;
-
   tollFree: string;
   phone: string;
   fax: string;
-
   email: string;
   manager: string;
-
   lat: number;
   lng: number;
-
   image: string;
   link: string;
 }
 
-
 /* ===================================================== */
 
-const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoom, TollFree, MainLine, Fax, Email, StoreManager }) => {
+const BtxNews: React.FC<IBtxNewsProps> = ({
+  List,
+  context,
+  dynamicZoom,
+  TollFree,
+  MainLine,
+  Fax,
+  Email,
+  StoreManager
+}) => {
 
   const mapRef = React.useRef<HTMLDivElement>(null);
-  const mapInstance = React.useRef<any>(null);
-  const markersRef = React.useRef<any[]>([]);
+  const mapInstance = React.useRef<L.Map | null>(null);
+  const markersRef = React.useRef<L.Marker[]>([]);
+
   const [stations, setStations] = React.useState<IStation[]>([]);
   const [filteredStations, setFilteredStations] = React.useState<IStation[]>([]);
   const [selected, setSelected] = React.useState<IStation | null>(null);
   const [search, setSearch] = React.useState('');
-  const [mapLoaded, setMapLoaded] = React.useState(false);
 
-
-  const defaultZoom = parseInt(dynamicZoom?.valueOf(), 10)
+  const defaultZoom = parseInt(dynamicZoom?.valueOf(), 10) || 8;
 
   /* =====================================================
      DATA
   ===================================================== */
   React.useEffect(() => {
-
     const loadData = async () => {
-
       const data = await getAllData(List, context);
 
       const sortedData = data.sort((a, b) =>
@@ -63,22 +73,15 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
 
       setStations(sortedData);
       setFilteredStations(sortedData);
-
-      // if (data.length > 0) {
-      //   setSelected();
-      // }
     };
 
     loadData();
-
   }, [List]);
 
-
   /* =====================================================
-     FILTERED LIST
+     FILTER
   ===================================================== */
   React.useEffect(() => {
-
     const result = stations
       .filter(s =>
         s.title.toLowerCase().indexOf(search.toLowerCase()) > -1
@@ -88,80 +91,52 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
       );
 
     setFilteredStations(result);
-
   }, [search, stations]);
 
   /* =====================================================
-     LOAD MAP
+     INIT MAP
   ===================================================== */
-
-  // React.useEffect(() => {
-
-  //   const script = document.createElement("script");
-  //   script.src = `https://maps.googleapis.com/maps/api/js?key=${"AIzaSyAKEce6-O8Jh7zoS2a-o0AO5K8MJAt_zwE"}`;
-  //   script.async = true;
-
-  //   script.onload = () => initMap();
-
-  //   document.body.appendChild(script);
-
-  // }, []);
   React.useEffect(() => {
+    if (!mapRef.current || stations.length === 0) return;
 
-    if ((window as any).google) {
-      setMapLoaded(true);
-      return;
-    }
+    if (mapInstance.current) return;
 
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${gmapToken}`;
-    script.async = true;
+    const streetLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png')
+    // L.tileLayer(
+    //   'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    //   {
+    //     attribution: '&copy; OpenStreetMap contributors'
+    //   }
+    // );
 
-    script.onload = () => {
-      setMapLoaded(true);
-    };
+    const satelliteLayer = L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      {
+        attribution: 'Tiles © Esri'
+      }
+    );
 
-    document.body.appendChild(script);
+    mapInstance.current = L.map(mapRef.current).setView(
+      [stations[0].lat, stations[0].lng],
+      4
+    );
 
-  }, []);
+    satelliteLayer.addTo(mapInstance.current);
 
-  React.useEffect(() => {
-
-    if (!mapLoaded || stations.length === 0 || !mapRef.current) return;
-
-    mapInstance.current = new google.maps.Map(mapRef.current, {
-      center: { lat: stations[0].lat, lng: stations[0].lng },
-      zoom: 4
-    });
+    L.control.layers(
+      {
+        "Street": streetLayer,
+        "Satellite": satelliteLayer
+      }
+    ).addTo(mapInstance.current);
 
     renderMarkers(stations);
 
-    //setSelected(stations[0]);
-
-  }, [mapLoaded, stations]);
-
-
-
-  // const initMap = () => {
-
-  //   if (!mapRef.current) return;
-
-  //   mapInstance.current = new google.maps.Map(mapRef.current, {
-  //     center: { lat: 39.5, lng: -98.35 },
-  //     zoom: 4
-  //   });
-
-  //   renderMarkers(filteredStations);
-
-  //   if (filteredStations.length > 0) {
-  //     setSelected(filteredStations[0]);
-  //   }
-  // };
+  }, [stations]);
 
   /* =====================================================
-     MARKERS (refresh on search)
+     UPDATE MARKERS ON FILTER
   ===================================================== */
-
   React.useEffect(() => {
     renderMarkers(filteredStations);
 
@@ -170,22 +145,24 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
     }
   }, [filteredStations]);
 
+  /* =====================================================
+     MARKERS
+  ===================================================== */
   const renderMarkers = (list: IStation[]) => {
-
     if (!mapInstance.current) return;
 
-    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current.forEach(m => m.remove());
     markersRef.current = [];
 
     list.forEach(s => {
-
-      const marker = new google.maps.Marker({
-        position: { lat: s.lat, lng: s.lng },
-        map: mapInstance.current,
-        title: s.title
-      });
-
-      marker.addListener("click", () => selectStation(s));
+      const marker = L.marker([s.lat, s.lng])
+        .addTo(mapInstance.current!)
+        // .bindPopup(`<b>${s.title}</b><br/>${s.address}`)
+        // .bindTooltip(s.title, {
+        //   permanent: true,
+        //   direction: 'top'
+        // })
+        .on('click', () => selectStation(s));
 
       markersRef.current.push(marker);
     });
@@ -194,17 +171,46 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
   /* =====================================================
      SELECT
   ===================================================== */
-
   const selectStation = (station: IStation) => {
 
     setSelected(station);
 
-    mapInstance.current.panTo({
-      lat: station.lat,
-      lng: station.lng
-    });
+    mapInstance.current?.setView(
+      [station.lat, station.lng],
+      defaultZoom
+    );
 
-    mapInstance.current.setZoom(defaultZoom);
+    let marker = null;
+
+    for (let i = 0; i < markersRef.current.length; i++) {
+      const m = markersRef.current[i];
+
+      if (
+        m.getLatLng().lat === station.lat &&
+        m.getLatLng().lng === station.lng
+      ) {
+        marker = m;
+        break;
+      }
+    }
+
+    if (marker) {
+      marker.openPopup();
+    }
+  };
+
+  /* =====================================================
+     RESET MAP
+  ===================================================== */
+  const resetMap = () => {
+    setSelected(null);
+
+    if (stations.length > 0) {
+      mapInstance.current?.setView(
+        [stations[0].lat, stations[0].lng],
+        4
+      );
+    }
   };
 
   /* =====================================================
@@ -216,9 +222,9 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
 
       {/* LEFT PANEL */}
       <div className={styles.leftPanel}>
-
         <div className={styles.leftHeader}>
-          <span className={styles.AllLocationsText}>All Locations</span>&ensp;<span>{filteredStations.length} stores available</span>
+          <span className={styles.AllLocationsText}>All Locations</span>&ensp;
+          <span>{filteredStations.length} stores available</span>
         </div>
 
         {/* SEARCH */}
@@ -228,7 +234,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
             placeholder="Search location..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            type='Search'
+            type='search'
           />
         </div>
 
@@ -251,20 +257,7 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
       {selected && (
         <div className={styles.detailsCard}>
 
-          <button
-            className={styles.close}
-            onClick={() => {
-              setSelected(null);
-
-              if (mapInstance.current && stations.length > 0) {
-                mapInstance.current.setZoom(4); // your initial/default zoom
-                mapInstance.current.panTo({
-                  lat: stations[0].lat,
-                  lng: stations[0].lng
-                });
-              }
-            }}
-          >
+          <button className={styles.close} onClick={resetMap}>
             ✕
           </button>
 
@@ -274,65 +267,63 @@ const BtxNews: React.FC<IBtxNewsProps> = ({ List, gmapToken, context, dynamicZoo
 
           <hr className={styles.divider} />
 
-          {/* Address */}
           <div className={styles.infoRow}>
-            <Icon iconName="POI" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
+            <Icon iconName="POI" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.address}</b>
               <b>{selected.address2}</b>
             </div>
           </div>
 
-          {/* Toll Free */}
           <div className={styles.infoRow}>
-            <Icon iconName="Phone" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
+            <Icon iconName="Phone" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.tollFree}</b>
               <span>{TollFree}</span>
             </div>
           </div>
 
-          {/* Phone */}
           <div className={styles.infoRow}>
-            <Icon iconName="Phone" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
+            <Icon iconName="Phone" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.phone}</b>
               <span>{MainLine}</span>
             </div>
           </div>
 
-          {/* Fax */}
           <div className={styles.infoRow}>
-            <Icon iconName="Print" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
+            <Icon iconName="Print" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.fax}</b>
               <span>{Fax}</span>
             </div>
           </div>
 
-          {/* Email */}
           <div className={styles.infoRow}>
-            <Icon iconName="Mail" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
+            <Icon iconName="Mail" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.email}</b>
               <span>{Email}</span>
             </div>
           </div>
 
-          {/* Manager */}
           <div className={styles.infoRow}>
-            <Icon iconName="Contact" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', borderRadius: '2px', padding: '10px' }} />
+            <Icon iconName="Contact" style={{ backgroundColor: 'rgb(242 234 234)', color: '#D30000', padding: '10px' }} />
             <div className={styles.divwraping}>
               <b>{selected.manager}</b>
               <span>{StoreManager}</span>
             </div>
           </div>
 
-          <button className={styles.primaryBtn} onClick={() => { window.open(selected?.link, "_blank", "") }}><Icon iconName="Warehouse" />View Station Profile</button>
+          <button
+            className={styles.primaryBtn}
+            onClick={() => window.open(selected?.link, "_blank")}
+          >
+            <Icon iconName="Warehouse" /> View Station Profile
+          </button>
 
         </div>
       )}
-
 
     </div>
   );

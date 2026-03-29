@@ -13,12 +13,14 @@
   },
   "dependencies": {
     "@fluentui/react": "^8.106.4",
+    "@googlemaps/js-api-loader": "^2.0.2",
     "@microsoft/sp-component-base": "1.18.2",
     "@microsoft/sp-core-library": "1.18.2",
     "@microsoft/sp-lodash-subset": "1.18.2",
     "@microsoft/sp-office-ui-fabric-core": "1.18.2",
     "@microsoft/sp-property-pane": "1.18.2",
     "@microsoft/sp-webpart-base": "1.18.2",
+    "@pnp/sp": "^4.17.0",
     "@pnp/spfx-controls-react": "^3.23.0",
     "@pnp/spfx-property-controls": "^3.22.0",
     "azure-maps-control": "^3.7.2",
@@ -26,8 +28,7 @@
     "react": "17.0.1",
     "react-dom": "17.0.1",
     "react-leaflet": "^2.8.0",
-    "tslib": "2.3.1",
-    "@pnp/sp": "^4.17.0"
+    "tslib": "2.3.1"
   },
   "devDependencies": {
     "@microsoft/eslint-config-spfx": "1.18.2",
